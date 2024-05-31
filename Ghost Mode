@@ -140,5 +140,17 @@ toggleButton.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Ensure the character parts are updated if the character respawns
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+    humanoid = character:WaitForChild("Humanoid")
+    
+    if walkThroughWallsEnabled then
+        coroutine.wrap(function()
+            maintainCanCollide(character, false)
+        end)()
+    end
+end)
+
 -- add the ScreenGui to the player's GUI
 screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
