@@ -1,0 +1,102 @@
+-- Create a ScreenGui instance
+local screenGui = Instance.new("ScreenGui")
+
+-- Create TextBox instance for Enter Gravity Power, and TextButton instances for Close and Go! buttons
+local enterGravityTextBox = Instance.new("TextBox", screenGui)
+local closeButton = Instance.new("TextButton", screenGui)
+local goButton = Instance.new("TextButton", screenGui)
+
+-- Customize Enter Gravity Power TextBox
+enterGravityTextBox.PlaceholderText = "Enter Gravity Power"
+enterGravityTextBox.Size = UDim2.new(0, 140, 0, 40)
+enterGravityTextBox.Position = UDim2.new(0.5, -70, 0.5, -20)
+enterGravityTextBox.BackgroundColor3 = Color3.fromRGB(137, 207, 240)
+enterGravityTextBox.Font = Enum.Font.SourceSans
+enterGravityTextBox.TextColor3 = Color3.new(1, 1, 1)
+enterGravityTextBox.TextSize = 20
+enterGravityTextBox.Text = "" -- Ensure the TextBox is initially empty
+
+-- Customize Close button
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 40, 0, 40)
+closeButton.Position = UDim2.new(0.5, -115, 0.5, -20)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.TextSize = 20
+
+-- Customize Go! button
+goButton.Text = "Go!"
+goButton.Size = UDim2.new(0, 40, 0, 40)
+goButton.Position = UDim2.new(0.5, 75, 0.5, -20)
+goButton.BackgroundColor3 = Color3.fromRGB(137, 207, 240)
+goButton.Font = Enum.Font.GothamBold
+goButton.TextColor3 = Color3.new(1, 1, 1)
+goButton.TextSize = 20
+
+-- Close button functionality
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy() -- Close the GUI when the Close button is clicked
+end)
+
+-- Go! button functionality
+goButton.MouseButton1Click:Connect(function()
+    local gravityPower = tonumber(enterGravityTextBox.Text)
+    if gravityPower then
+        -- Apply the entered gravity power to the workspace
+        workspace.Gravity = gravityPower
+    else
+        -- Handle invalid input (e.g., not a number)
+        warn("Invalid gravity power entered")
+    end
+end)
+
+-- Add the ScreenGui to the player's GUI
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Function to make the buttons and TextBox draggable together
+local function makeDraggable(elements)
+    local dragging = false
+    local dragInput, mousePos, startPositions
+
+    local function updatePositions(delta)
+        for _, element in pairs(elements) do
+            element.Position = UDim2.new(element.Position.X.Scale, startPositions[element].X + delta.X, element.Position.Y.Scale, startPositions[element].Y + delta.Y)
+        end
+    end
+
+    for _, element in pairs(elements) do
+        element.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+                mousePos = input.Position
+                startPositions = {}
+                for _, elem in pairs(elements) do
+                    startPositions[elem] = {X = elem.Position.X.Offset, Y = elem.Position.Y.Offset}
+                end
+
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                    end
+                end)
+            end
+        end)
+
+        element.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                dragInput = input
+            end
+        end)
+    end
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - mousePos
+            updatePositions(delta)
+        end
+    end)
+end
+
+-- Make the buttons and TextBox draggable together
+makeDraggable({enterGravityTextBox, closeButton, goButton})
