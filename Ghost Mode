@@ -94,19 +94,6 @@ end
 -- connect the key press event
 userInputService.InputBegan:Connect(onKeyPress)
 
--- Close button functionality with 0.1-second delay
-closeButton.MouseButton1Click:Connect(function()
-    isXPressed = true -- mark the X button as pressed
-    wait(0.1) -- wait for 0.1 seconds before closing the GUI
-    screenGui:Destroy() -- close the GUI
-end)
-
--- Ghost Mode button functionality
-ghostModeButton.MouseButton1Click:Connect(function()
-    -- define what happens when the Ghost Mode button is clicked
-    print("Ghost Mode button clicked")
-end)
-
 -- Walk through Walls toggle functionality
 local walkThroughWallsEnabled = false
 
@@ -140,6 +127,16 @@ toggleButton.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Close button functionality with 0.1-second delay
+closeButton.MouseButton1Click:Connect(function()
+    isXPressed = true -- mark the X button as pressed
+    walkThroughWallsEnabled = false
+    toggleButton.Text = "Off"
+    toggleCanCollide(character, true) -- ensure CanCollide is set to true for all parts
+    wait(0.1) -- wait for 0.1 seconds before closing the GUI
+    screenGui:Destroy() -- close the GUI
+end)
+
 -- Ensure the character parts are updated if the character respawns
 player.CharacterAdded:Connect(function(newCharacter)
     character = newCharacter
@@ -149,8 +146,13 @@ player.CharacterAdded:Connect(function(newCharacter)
         coroutine.wrap(function()
             maintainCanCollide(character, false)
         end)()
+    else
+        toggleCanCollide(character, true)
     end
 end)
 
 -- add the ScreenGui to the player's GUI
 screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Set CanCollide to true for all parts when script starts, ensuring no initial wall-walking
+toggleCanCollide(character, true)
