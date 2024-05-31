@@ -1,0 +1,124 @@
+-- Create a ScreenGui instance
+local screenGui = Instance.new("ScreenGui")
+
+-- Create TextButton instances for Infinite Jump, Close, and Off buttons
+local infiniteJumpButton = Instance.new("TextButton", screenGui)
+local closeButton = Instance.new("TextButton", screenGui)
+local toggleButton = Instance.new("TextButton", screenGui)
+
+-- Customize Infinite Jump button
+infiniteJumpButton.Text = "Infinite Jump" -- Renamed the button
+infiniteJumpButton.Size = UDim2.new(0, 140, 0, 40)
+infiniteJumpButton.Position = UDim2.new(0.5, -70, 0.5, -20)
+infiniteJumpButton.BackgroundColor3 = Color3.fromRGB(137, 207, 240)
+infiniteJumpButton.Font = Enum.Font.SourceSans
+infiniteJumpButton.TextColor3 = Color3.new(1, 1, 1)
+infiniteJumpButton.TextSize = 20
+
+-- Customize Close button
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 40, 0, 40)
+closeButton.Position = UDim2.new(0.5, -115, 0.5, -20)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.TextSize = 20
+
+-- Customize Off button
+toggleButton.Text = "Off"
+toggleButton.Size = UDim2.new(0, 40, 0, 40)
+toggleButton.Position = UDim2.new(0.5, 75, 0.5, -20)
+toggleButton.BackgroundColor3 = Color3.fromRGB(137, 207, 240)
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.TextColor3 = Color3.new(1, 1, 1)
+toggleButton.TextSize = 20
+
+-- Draggable functionality for the buttons
+local userInputService = game:GetService("UserInputService")
+local dragging = false
+local dragStart = nil
+local startPos = nil
+
+local function updateButtonPositions(delta)
+    infiniteJumpButton.Position = UDim2.new(startPos.infiniteJumpButton.X.Scale, startPos.infiniteJumpButton.X.Offset + delta.X, startPos.infiniteJumpButton.Y.Scale, startPos.infiniteJumpButton.Y.Offset + delta.Y)
+    closeButton.Position = UDim2.new(startPos.closeButton.X.Scale, startPos.closeButton.X.Offset + delta.X, startPos.closeButton.Y.Scale, startPos.closeButton.Y.Offset + delta.Y)
+    toggleButton.Position = UDim2.new(startPos.toggleButton.X.Scale, startPos.toggleButton.X.Offset + delta.X, startPos.toggleButton.Y.Scale, startPos.toggleButton.Y.Offset + delta.Y)
+end
+
+local function onInputChanged(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        updateButtonPositions(delta)
+    end
+end
+
+local function onInputEnded(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end
+
+infiniteJumpButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = {
+            infiniteJumpButton = infiniteJumpButton.Position,
+            closeButton = closeButton.Position,
+            toggleButton = toggleButton.Position,
+        }
+    end
+end)
+
+userInputService.InputChanged:Connect(onInputChanged)
+userInputService.InputEnded:Connect(onInputEnded)
+
+-- Player Jump functionality
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local isJumpEnabled = false
+local isXPressed = false
+
+-- Function to handle key press
+local function onKeyPress(input, gameProcessedEvent)
+    if gameProcessedEvent then
+        return
+    end
+
+    -- Check if the spacebar is pressed
+    if input.KeyCode == Enum.KeyCode.Space then
+        -- If infinite jump is enabled and X button is not pressed, allow jump
+        if isJumpEnabled and not isXPressed then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        -- If X button is pressed, only allow jump if character is touching the ground
+        elseif isXPressed and humanoid:GetState() == Enum.HumanoidStateType.Running then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end
+
+-- Connect the key press event
+userInputService.InputBegan:Connect(onKeyPress)
+
+-- Toggle button functionality
+toggleButton.MouseButton1Click:Connect(function()
+    isJumpEnabled = not isJumpEnabled
+    toggleButton.Text = isJumpEnabled and "On" or "Off"
+end)
+
+-- Close button functionality with 0.1-second delay
+closeButton.MouseButton1Click:Connect(function()
+    isXPressed = true -- Mark the X button as pressed
+    wait(0.1) -- Wait for 0.1 seconds before closing the GUI
+    screenGui:Destroy() -- Close the GUI
+end)
+
+-- Infinite Jump button functionality
+infiniteJumpButton.MouseButton1Click:Connect(function()
+    -- Define what happens when the Infinite Jump button is clicked
+    print("Infinite Jump button clicked")
+end)
+
+-- Add the ScreenGui to the player's GUI
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
