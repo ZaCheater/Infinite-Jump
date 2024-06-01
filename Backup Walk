@@ -1,6 +1,10 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
 -- Create a ScreenGui
 local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+screenGui.Parent = playerGui
 
 -- Create four draggable buttons
 local buttons = {}
@@ -25,38 +29,28 @@ closeButton.MouseButton1Click:Connect(function()
     screenGui:Destroy()
 end)
 
--- Create the other three buttons with baby blue color and rename them
-local buttonNames = {"Fly", "Infinite Jump", "Gravity"}
-for i = 1, 3 do
+-- Create the other two buttons with the provided RGB color and rename them
+local buttonNames = {"Walk", "Ghost Mode"}
+for i = 1, 2 do
     local button = Instance.new("TextButton")
     button.Size = buttonSize
     button.Text = buttonNames[i] -- Set button text to the corresponding name
     button.Position = UDim2.new(0.5, -75, 0.4 + i * (0.05 + closeButtonSize.Y.Scale), 0) -- Adjusted for new size and spacing
-    button.BackgroundColor3 = Color3.fromRGB(137, 207, 240) -- Baby blue color
+    button.BackgroundColor3 = Color3.fromRGB(240, 211, 96) -- Provided RGB color
     button.Font = Enum.Font.GothamBold
     button.TextColor3 = Color3.new(1, 1, 1)
     button.TextSize = 20
     button.Parent = screenGui
     table.insert(buttons, button)
 
-    -- Add click event handler for the "Infinite Jump" button
-    if i == 2 then
-        button.MouseButton1Click:Connect(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaCheater/Infinite-Jump/main/Infinite%20Jump"))()
-        end)
-    end
-
-    -- Add click event handler for the "Fly" button
+    -- Add event handlers for the buttons
     if i == 1 then
         button.MouseButton1Click:Connect(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaCheater/Infinite-Jump/main/Edit%20Speed"))()
         end)
-    end
-
-    -- Add click event handler for the "Gravity" button
-    if i == 3 then
+    elseif i == 2 then
         button.MouseButton1Click:Connect(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaCheater/Infinite-Jump/main/Gravity"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaCheater/Infinite-Jump/main/Ghost%20Mode"))()
         end)
     end
 end
