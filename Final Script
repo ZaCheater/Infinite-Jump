@@ -1,0 +1,125 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Create a ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = playerGui
+
+-- Create four draggable buttons
+local buttons = {}
+local closeButtonSize = UDim2.new(0, 100, 0, 40) -- Slightly smaller vertical size for the close button
+local buttonSize = UDim2.new(0, 200, 0, 50)
+local buttonSpacing = 10 -- Spacing between buttons
+
+for i = 1, 4 do
+    local button = Instance.new("TextButton")
+    if i == 1 then
+        button.Size = closeButtonSize
+        button.Text = "-" -- Renamed Close button
+        button.Position = UDim2.new(0.5, -100, 0.4, 0) -- Adjust position for Close button
+    elseif i == 2 then
+        button.Size = buttonSize
+        button.Text = "Fly" -- Renamed Fly button
+        button.Position = UDim2.new(0.5, -100, 0.4 + (i - 1) * (0.05 + buttonSize.Y.Scale), 0) -- Adjusted for new size
+    elseif i == 3 then
+        button.Size = buttonSize
+        button.Text = "Walk" -- Renamed Walk button
+        button.Position = UDim2.new(0.5, -100, 0.4 + (i - 1) * (0.05 + buttonSize.Y.Scale), 0) -- Adjusted for new size
+    else
+        button.Size = buttonSize
+        button.Text = "Others" -- Renamed Others button
+        button.Position = UDim2.new(0.5, -100, 0.4 + (i - 1) * (0.05 + buttonSize.Y.Scale), 0) -- Adjusted for new size
+    end
+
+    button.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+    button.Font = Enum.Font.GothamBold
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.TextSize = 20
+    button.Parent = screenGui
+    table.insert(buttons, button)
+end
+
+-- Function to execute the script when "Fly" button is clicked
+buttons[2].MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaCheater/Infinite-Jump/main/Full%20FLY"))()
+end)
+
+-- Function to execute the script when "Others" button is clicked
+buttons[3].MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaCheater/Infinite-Jump/main/Walk%20real"))()
+end)
+
+-- Function to execute the script when "Walk" button is clicked
+buttons[4].MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaCheater/Infinite-Jump/main/Others"))()
+end)
+
+-- Create the Close button
+local extraButton = Instance.new("TextButton")
+extraButton.Size = closeButtonSize
+extraButton.Position = UDim2.new(0.5, 0, 0.4, 0)
+extraButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Red color
+extraButton.Font = Enum.Font.GothamBold
+extraButton.TextColor3 = Color3.new(1, 1, 1)
+extraButton.TextSize = 20
+extraButton.Text = "Close"
+extraButton.Parent = screenGui
+table.insert(buttons, extraButton)
+
+-- Function to close the GUI
+extraButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+-- Variables to hold the dragging state
+local dragging = false
+local dragInput, mousePos, framePos
+
+-- Function to update the buttons' positions
+local function update(input)
+    local delta = input.Position - mousePos
+    for _, button in ipairs(buttons) do
+        button.Position = UDim2.new(
+            framePos[button].X.Scale,
+            framePos[button].X.Offset + delta.X,
+            framePos[button].Y.Scale,
+            framePos[button].Y.Offset + delta.Y
+        )
+    end
+end
+
+-- Detect when input begins on any button
+for _, button in ipairs(buttons) do
+    button.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            mousePos = input.Position
+            framePos = {}
+            for _, btn in ipairs(buttons) do
+                framePos[btn] = btn.Position
+            end
+
+            -- Detect when the input state changes (e.g., mouse button released)
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    -- Detect changes in input (e.g., mouse movement)
+    button.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+end
+
+-- Update buttons' positions as the input changes
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
