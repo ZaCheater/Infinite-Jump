@@ -42,7 +42,7 @@ end
 
 -- Function to execute the script when "Fly" button is clicked
 buttons[2].MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("-- Create a ScreenGui
+-- Create a ScreenGui
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
@@ -852,12 +852,12 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
     if input == dragInput and dragging then
         update(input)
     end
-end)"))()
+end)
 end)
 
 -- Function to execute the script when "Others" button is clicked
 buttons[3].MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("local Players = game:GetService("Players")
+local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
@@ -1227,12 +1227,12 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
     if input == dragInput and dragging then
         update(input)
     end
-end)"))()
+end)
 end)
 
 -- Function to execute the script when "Walk" button is clicked
 buttons[4].MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("-- Create a ScreenGui
+-- Create a ScreenGui
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
@@ -1737,12 +1737,12 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
     if input == dragInput and dragging then
         update(input)
     end
-end)"))()
+end)
 end)
 
 -- Function to execute the script when "-" button is clicked
 buttons[1].MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("local screenGui = Instance.new("ScreenGui")
+local screenGui = Instance.new("ScreenGui")
 
 local hacksButton = Instance.new("TextButton", screenGui)
 
@@ -1856,7 +1856,7 @@ end)
 
 -- Add the ScreenGui to the player's GUI
 
-screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")"))()
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     screenGui:Destroy() -- Destroy GUI after executing script
 end)
 
