@@ -1,0 +1,167 @@
+-- Create a ScreenGui instance
+local screenGui = Instance.new("ScreenGui")
+
+-- Create TextBox instance for Fling and Troll, and TextButton instances for Close and Go! buttons
+local flingTextBox = Instance.new("TextBox", screenGui)
+local closeButton = Instance.new("TextButton", screenGui)
+local goButton = Instance.new("TextButton", screenGui)
+
+-- Customize Fling and Troll TextBox
+flingTextBox.Text = "Enter Player Name"
+flingTextBox.Size = UDim2.new(0, 140, 0, 40)
+flingTextBox.Position = UDim2.new(0.5, -70, 0.5, -20)
+flingTextBox.BackgroundColor3 = Color3.fromRGB(204, 116, 229)
+flingTextBox.Font = Enum.Font.SourceSans
+flingTextBox.TextColor3 = Color3.new(1, 1, 1)
+flingTextBox.TextSize = 20
+
+-- Customize Close button
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 40, 0, 40)
+closeButton.Position = UDim2.new(0.5, -115, 0.5, -20)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.TextSize = 20
+
+-- Customize Go! button
+goButton.Text = "Go!"
+goButton.Size = UDim2.new(0, 40, 0, 40)
+goButton.Position = UDim2.new(0.5, 75, 0.5, -20)
+goButton.BackgroundColor3 = Color3.fromRGB(204, 116, 229)
+goButton.Font = Enum.Font.GothamBold
+goButton.TextColor3 = Color3.new(1, 1, 1)
+goButton.TextSize = 20
+
+-- Function to make a group of elements draggable
+local function makeGroupDraggable(elements)
+    local dragging = false
+    local dragStart
+    local startPositions = {}
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        for _, element in pairs(elements) do
+            local startPos = startPositions[element]
+            element.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end
+
+    local function onInputBegan(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPositions = {}
+            for _, element in pairs(elements) do
+                startPositions[element] = element.Position
+            end
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end
+
+    local function onInputChanged(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+            update(input)
+        end
+    end
+
+    for _, element in pairs(elements) do
+        element.InputBegan:Connect(onInputBegan)
+        element.InputChanged:Connect(onInputChanged)
+    end
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if dragging then
+            update(input)
+        end
+    end)
+end
+
+-- Make the buttons draggable as a group
+makeGroupDraggable({flingTextBox, closeButton, goButton})
+
+-- Close GUI when close button is clicked
+closeButton.MouseButton1Click:Connect(function()
+    screenGui.Enabled = false
+end)
+
+-- Player search and notification functions from the trollface script
+local lp = game:FindService("Players").LocalPlayer
+
+local function gplr(String)
+    local Found = {}
+    local strl = String:lower()
+    if strl == "all" then
+        for i,v in pairs(game:FindService("Players"):GetPlayers()) do
+            table.insert(Found,v)
+        end
+    elseif strl == "others" then
+        for i,v in pairs(game:FindService("Players"):GetPlayers()) do
+            if v.Name ~= lp.Name then
+                table.insert(Found,v)
+            end
+        end 
+    elseif strl == "me" then
+        for i,v in pairs(game:FindService("Players"):GetPlayers()) do
+            if v.Name == lp.Name then
+                table.insert(Found,v)
+            end
+        end 
+    else
+        for i,v in pairs(game:FindService("Players"):GetPlayers()) do
+            if v.Name:lower():sub(1, #String) == String:lower() or v.DisplayName:lower():sub(1, #String) == String:lower() then
+                table.insert(Found,v)
+            end
+        end 
+    end
+    return Found 
+end
+
+local function notif(str,dur)
+    game:FindService("StarterGui"):SetCore("SendNotification", {
+        Title = "Yeet GUI",
+        Text = str,
+        Icon = "rbxassetid://2005276185",
+        Duration = dur or 3
+    })
+end
+
+-- Function to troll a player
+local function trollPlayer(playerName)
+    local Target = gplr(playerName)
+    if Target[1] then
+        Target = Target[1]
+
+        local Thrust = Instance.new('BodyThrust', lp.Character.HumanoidRootPart)
+        Thrust.Force = Vector3.new(9999,9999,9999)
+        Thrust.Name = "YeetForce"
+        repeat
+            lp.Character.HumanoidRootPart.CFrame = Target.Character.HumanoidRootPart.CFrame
+            Thrust.Location = Target.Character.HumanoidRootPart.Position
+            game:FindService("RunService").Heartbeat:wait()
+        until not Target.Character:FindFirstChild("Head")
+    else
+        notif("Invalid player")
+    end
+end
+
+-- Connect the Go! button to the trolling function
+goButton.MouseButton1Click:Connect(function()
+    local playerName = flingTextBox.Text
+    trollPlayer(playerName)
+end)
+
+-- Add the ScreenGui to the player's GUI
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Initial notification
+notif("Loaded successfully! Created by ONI", 5)
