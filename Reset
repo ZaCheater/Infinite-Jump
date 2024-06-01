@@ -11,38 +11,33 @@ resetButton.Font = Enum.Font.GothamBold
 resetButton.TextColor3 = Color3.new(1, 1, 1)
 resetButton.TextSize = 20
 
--- Create a container for the 'Yes' and 'No' buttons
-local buttonContainer = Instance.new("Frame", screenGui)
-buttonContainer.Size = UDim2.new(0, 300, 0, 40)
-buttonContainer.Position = UDim2.new(0.5, -150, 0.5, 0) -- Positioned directly below the resetButton
-buttonContainer.BackgroundTransparency = 1 -- Make the container invisible
-
 -- Create 'Yes' Button
-local yesButton = Instance.new("TextButton", buttonContainer)
+local yesButton = Instance.new("TextButton", screenGui)
 yesButton.Text = "Yes"
-yesButton.Size = UDim2.new(0, 150, 0, 40)
-yesButton.Position = UDim2.new(0, 150, 0, 0) -- New position
+yesButton.Size = UDim2.new(0, 150, 0, 50)
+yesButton.Position = UDim2.new(0.5, -150, 0.5, 0) -- Positioned directly below the resetButton
 yesButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
 yesButton.Font = Enum.Font.GothamBold
 yesButton.TextColor3 = Color3.new(1, 1, 1)
 yesButton.TextSize = 20
 
 -- Create 'No' Button
-local noButton = Instance.new("TextButton", buttonContainer)
+local noButton = Instance.new("TextButton", screenGui)
 noButton.Text = "No"
-noButton.Size = UDim2.new(0, 150, 0, 40)
-noButton.Position = UDim2.new(0, 0, 0, 0) -- New position
+noButton.Size = UDim2.new(0, 150, 0, 50)
+noButton.Position = UDim2.new(0.5, 0, 0.5, 0) -- Positioned directly below the resetButton
 noButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 noButton.Font = Enum.Font.GothamBold
 noButton.TextColor3 = Color3.new(1, 1, 1)
 noButton.TextSize = 20
 
--- Function to make the buttons draggable and stick together
-local function makeButtonsDraggable(button1, button2)
+-- Function to make the buttons draggable and move together
+local function makeButtonsDraggable(button1, button2, button3)
     local dragging = false
     local dragStart
     local startPosition1
     local startPosition2
+    local startPosition3
 
     local function update(input)
         local delta = input.Position - dragStart
@@ -52,8 +47,18 @@ local function makeButtonsDraggable(button1, button2)
             startPosition1.Y.Scale,
             startPosition1.Y.Offset + delta.Y
         )
-        -- Update button2's position to stick with button1
-        button2.Position = button1.Position
+        button2.Position = UDim2.new(
+            startPosition2.X.Scale,
+            startPosition2.X.Offset + delta.X,
+            startPosition2.Y.Scale,
+            startPosition2.Y.Offset + delta.Y
+        )
+        button3.Position = UDim2.new(
+            startPosition3.X.Scale,
+            startPosition3.X.Offset + delta.X,
+            startPosition3.Y.Scale,
+            startPosition3.Y.Offset + delta.Y
+        )
     end
 
     local function onInputBegan(input)
@@ -62,6 +67,7 @@ local function makeButtonsDraggable(button1, button2)
             dragStart = input.Position
             startPosition1 = button1.Position
             startPosition2 = button2.Position
+            startPosition3 = button3.Position
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     dragging = false
@@ -86,11 +92,8 @@ local function makeButtonsDraggable(button1, button2)
     end)
 end
 
--- Make the reset button and 'Yes' button draggable and stick together
-makeButtonsDraggable(resetButton, yesButton)
-
--- Make the 'Yes' and 'No' buttons draggable and stick together
-makeButtonsDraggable(yesButton, noButton)
+-- Make the buttons draggable and move together
+makeButtonsDraggable(resetButton, yesButton, noButton)
 
 -- Add the ScreenGui to the player's GUI
 screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
@@ -102,11 +105,12 @@ yesButton.MouseButton1Click:Connect(function()
     if player and player.Character then
         player.Character:BreakJoints()
     end
+    screenGui:Destroy() -- Close the GUI after resetting
 end)
 
 -- Functionality for the 'No' button
 noButton.MouseButton1Click:Connect(function()
-    screenGui:Destroy()
+    screenGui:Destroy() -- Just close the GUI
 end)
 
 -- Initial notification
