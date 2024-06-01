@@ -55,6 +55,11 @@ buttons[4].MouseButton1Click:Connect(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaCheater/Infinite-Jump/main/Others"))()
 end)
 
+-- Function to execute the script when "-" button is clicked
+buttons[1].MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaCheater/Infinite-Jump/main/Cheats"))()
+end)
+
 -- Create the Close button
 local extraButton = Instance.new("TextButton")
 extraButton.Size = closeButtonSize
