@@ -42,22 +42,1822 @@ end
 
 -- Function to execute the script when "Fly" button is clicked
 buttons[2].MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaCheater/Infinite-Jump/main/Full%20FLY"))()
+    loadstring(game:HttpGet("-- Create a ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create four draggable buttons
+local buttons = {}
+local closeButtonSize = UDim2.new(0, 150, 0, 40) -- Slightly smaller horizontal size for the Close button
+local buttonSize = UDim2.new(0, 150, 0, 50) -- Slightly smaller horizontal size for the buttons
+local buttonSpacing = 10 -- Spacing between buttons
+
+-- Create the Close button first
+local closeButton = Instance.new("TextButton")
+closeButton.Size = closeButtonSize -- Adjusted size for the Close button
+closeButton.Position = UDim2.new(0.5, -75, 0.4, 0) -- Position for Close button (original position of "-")
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Red color
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.TextSize = 20
+closeButton.Text = "Close" -- Close button text
+closeButton.Parent = screenGui
+table.insert(buttons, closeButton)
+
+-- Function to close the GUI
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+-- Create the other three buttons with baby blue color and rename them
+local buttonNames = {"Fly", "Infinite Jump", "Gravity"}
+for i = 1, 3 do
+    local button = Instance.new("TextButton")
+    button.Size = buttonSize
+    button.Text = buttonNames[i] -- Set button text to the corresponding name
+    button.Position = UDim2.new(0.5, -75, 0.4 + i * (0.05 + closeButtonSize.Y.Scale), 0) -- Adjusted for new size and spacing
+    button.BackgroundColor3 = Color3.fromRGB(137, 207, 240) -- Baby blue color
+    button.Font = Enum.Font.GothamBold
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.TextSize = 20
+    button.Parent = screenGui
+    table.insert(buttons, button)
+
+    -- Add click event handler for the "Infinite Jump" button
+    if i == 2 then
+        button.MouseButton1Click:Connect(function()
+-- Create a ScreenGui instance
+local screenGui = Instance.new("ScreenGui")
+
+-- Create TextButton instances for Infinite Jump, Close, and Off buttons
+local infiniteJumpButton = Instance.new("TextButton", screenGui)
+local closeButton = Instance.new("TextButton", screenGui)
+local toggleButton = Instance.new("TextButton", screenGui)
+
+-- Customize Infinite Jump button
+infiniteJumpButton.Text = "Infinite Jump" -- Renamed the button
+infiniteJumpButton.Size = UDim2.new(0, 140, 0, 40)
+infiniteJumpButton.Position = UDim2.new(0.5, -70, 0.5, -20)
+infiniteJumpButton.BackgroundColor3 = Color3.fromRGB(137, 207, 240)
+infiniteJumpButton.Font = Enum.Font.SourceSans
+infiniteJumpButton.TextColor3 = Color3.new(1, 1, 1)
+infiniteJumpButton.TextSize = 20
+
+-- Customize Close button
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 40, 0, 40)
+closeButton.Position = UDim2.new(0.5, -115, 0.5, -20)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.TextSize = 20
+
+-- Customize Off button
+toggleButton.Text = "Off"
+toggleButton.Size = UDim2.new(0, 40, 0, 40)
+toggleButton.Position = UDim2.new(0.5, 75, 0.5, -20)
+toggleButton.BackgroundColor3 = Color3.fromRGB(137, 207, 240)
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.TextColor3 = Color3.new(1, 1, 1)
+toggleButton.TextSize = 20
+
+-- Draggable functionality for the buttons
+local userInputService = game:GetService("UserInputService")
+local dragging = false
+local dragStart = nil
+local startPos = nil
+
+local function updateButtonPositions(delta)
+    infiniteJumpButton.Position = UDim2.new(startPos.infiniteJumpButton.X.Scale, startPos.infiniteJumpButton.X.Offset + delta.X, startPos.infiniteJumpButton.Y.Scale, startPos.infiniteJumpButton.Y.Offset + delta.Y)
+    closeButton.Position = UDim2.new(startPos.closeButton.X.Scale, startPos.closeButton.X.Offset + delta.X, startPos.closeButton.Y.Scale, startPos.closeButton.Y.Offset + delta.Y)
+    toggleButton.Position = UDim2.new(startPos.toggleButton.X.Scale, startPos.toggleButton.X.Offset + delta.X, startPos.toggleButton.Y.Scale, startPos.toggleButton.Y.Offset + delta.Y)
+end
+
+local function onInputChanged(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        updateButtonPositions(delta)
+    end
+end
+
+local function onInputEnded(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end
+
+infiniteJumpButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = {
+            infiniteJumpButton = infiniteJumpButton.Position,
+            closeButton = closeButton.Position,
+            toggleButton = toggleButton.Position,
+        }
+    end
+end)
+
+userInputService.InputChanged:Connect(onInputChanged)
+userInputService.InputEnded:Connect(onInputEnded)
+
+-- Player Jump functionality
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local isJumpEnabled = false
+local isXPressed = false
+
+-- Function to handle key press
+local function onKeyPress(input, gameProcessedEvent)
+    if gameProcessedEvent then
+        return
+    end
+
+    -- Check if the spacebar is pressed
+    if input.KeyCode == Enum.KeyCode.Space then
+        -- If infinite jump is enabled and X button is not pressed, allow jump
+        if isJumpEnabled and not isXPressed then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        -- If X button is pressed, only allow jump if character is touching the ground
+        elseif isXPressed and humanoid:GetState() == Enum.HumanoidStateType.Running then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end
+
+-- Connect the key press event
+userInputService.InputBegan:Connect(onKeyPress)
+
+-- Toggle button functionality
+toggleButton.MouseButton1Click:Connect(function()
+    isJumpEnabled = not isJumpEnabled
+    toggleButton.Text = isJumpEnabled and "On" or "Off"
+end)
+
+-- Close button functionality with 0.1-second delay
+closeButton.MouseButton1Click:Connect(function()
+    isXPressed = true -- Mark the X button as pressed
+    wait(0.1) -- Wait for 0.1 seconds before closing the GUI
+    screenGui:Destroy() -- Close the GUI
+end)
+
+-- Infinite Jump button functionality
+infiniteJumpButton.MouseButton1Click:Connect(function()
+    -- Define what happens when the Infinite Jump button is clicked
+    print("Infinite Jump button clicked")
+end)
+
+-- Add the ScreenGui to the player's GUI
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+        end)
+    end
+
+    -- Add click event handler for the "Fly" button
+    if i == 1 then
+        button.MouseButton1Click:Connect(function()
+local main = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local up = Instance.new("TextButton")
+local down = Instance.new("TextButton")
+local onof = Instance.new("TextButton")
+local TextLabel = Instance.new("TextLabel")
+local plus = Instance.new("TextButton")
+local speed = Instance.new("TextLabel")
+local mine = Instance.new("TextButton")
+local closebutton = Instance.new("TextButton")
+local mini = Instance.new("TextButton")
+local mini2 = Instance.new("TextButton")
+
+main.Name = "main"
+main.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+main.ResetOnSpawn = false
+
+Frame.Parent = main
+Frame.BackgroundColor3 = Color3.fromRGB(163, 255, 137)
+Frame.BorderColor3 = Color3.fromRGB(103, 221, 213)
+Frame.Position = UDim2.new(0.100320168, 0, 0.379746825, 0)
+Frame.Size = UDim2.new(0, 190, 0, 57)
+
+up.Name = "up"
+up.Parent = Frame
+up.BackgroundColor3 = Color3.fromRGB(79, 255, 152)
+up.Size = UDim2.new(0, 44, 0, 28)
+up.Font = Enum.Font.SourceSans
+up.Text = "UP"
+up.TextColor3 = Color3.fromRGB(0, 0, 0)
+up.TextSize = 14.000
+
+down.Name = "down"
+down.Parent = Frame
+down.BackgroundColor3 = Color3.fromRGB(215, 255, 121)
+down.Position = UDim2.new(0, 0, 0.491228074, 0)
+down.Size = UDim2.new(0, 44, 0, 28)
+down.Font = Enum.Font.SourceSans
+down.Text = "DOWN"
+down.TextColor3 = Color3.fromRGB(0, 0, 0)
+down.TextSize = 14.000
+
+onof.Name = "onof"
+onof.Parent = Frame
+onof.BackgroundColor3 = Color3.fromRGB(255, 249, 74)
+onof.Position = UDim2.new(0.702823281, 0, 0.491228074, 0)
+onof.Size = UDim2.new(0, 56, 0, 28)
+onof.Font = Enum.Font.SourceSans
+onof.Text = "fly"
+onof.TextColor3 = Color3.fromRGB(0, 0, 0)
+onof.TextSize = 14.000
+
+TextLabel.Parent = Frame
+TextLabel.BackgroundColor3 = Color3.fromRGB(242, 60, 255)
+TextLabel.Position = UDim2.new(0.469327301, 0, 0, 0)
+TextLabel.Size = UDim2.new(0, 100, 0, 28)
+TextLabel.Font = Enum.Font.SourceSans
+TextLabel.Text = "FLY GUI V3"
+TextLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+TextLabel.TextScaled = true
+TextLabel.TextSize = 14.000
+TextLabel.TextWrapped = true
+
+plus.Name = "plus"
+plus.Parent = Frame
+plus.BackgroundColor3 = Color3.fromRGB(133, 145, 255)
+plus.Position = UDim2.new(0.231578946, 0, 0, 0)
+plus.Size = UDim2.new(0, 45, 0, 28)
+plus.Font = Enum.Font.SourceSans
+plus.Text = "+"
+plus.TextColor3 = Color3.fromRGB(0, 0, 0)
+plus.TextScaled = true
+plus.TextSize = 14.000
+plus.TextWrapped = true
+
+speed.Name = "speed"
+speed.Parent = Frame
+speed.BackgroundColor3 = Color3.fromRGB(255, 85, 0)
+speed.Position = UDim2.new(0.468421042, 0, 0.491228074, 0)
+speed.Size = UDim2.new(0, 44, 0, 28)
+speed.Font = Enum.Font.SourceSans
+speed.Text = "1"
+speed.TextColor3 = Color3.fromRGB(0, 0, 0)
+speed.TextScaled = true
+speed.TextSize = 14.000
+speed.TextWrapped = true
+
+mine.Name = "mine"
+mine.Parent = Frame
+mine.BackgroundColor3 = Color3.fromRGB(123, 255, 247)
+mine.Position = UDim2.new(0.231578946, 0, 0.491228074, 0)
+mine.Size = UDim2.new(0, 45, 0, 29)
+mine.Font = Enum.Font.SourceSans
+mine.Text = "-"
+mine.TextColor3 = Color3.fromRGB(0, 0, 0)
+mine.TextScaled = true
+mine.TextSize = 14.000
+mine.TextWrapped = true
+
+closebutton.Name = "Close"
+closebutton.Parent = main.Frame
+closebutton.BackgroundColor3 = Color3.fromRGB(225, 25, 0)
+closebutton.Font = "SourceSans"
+closebutton.Size = UDim2.new(0, 45, 0, 28)
+closebutton.Text = "X"
+closebutton.TextSize = 30
+closebutton.Position =  UDim2.new(0, 0, -1, 27)
+
+mini.Name = "minimize"
+mini.Parent = main.Frame
+mini.BackgroundColor3 = Color3.fromRGB(192, 150, 230)
+mini.Font = "SourceSans"
+mini.Size = UDim2.new(0, 45, 0, 28)
+mini.Text = "-"
+mini.TextSize = 40
+mini.Position = UDim2.new(0, 44, -1, 27)
+
+mini2.Name = "minimize2"
+mini2.Parent = main.Frame
+mini2.BackgroundColor3 = Color3.fromRGB(192, 150, 230)
+mini2.Font = "SourceSans"
+mini2.Size = UDim2.new(0, 45, 0, 28)
+mini2.Text = "+"
+mini2.TextSize = 40
+mini2.Position = UDim2.new(0, 44, -1, 57)
+mini2.Visible = false
+
+speeds = 1
+
+local speaker = game:GetService("Players").LocalPlayer
+
+local chr = game.Players.LocalPlayer.Character
+local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+
+nowe = false
+
+game:GetService("StarterGui"):SetCore("SendNotification", { 
+	Title = "FLY GUI V3";
+	Text = "BY XNEO";
+	Icon = "rbxthumb://type=Asset&id=5107182114&w=150&h=150"})
+Duration = 5;
+
+Frame.Active = true -- main = gui
+Frame.Draggable = true
+
+onof.MouseButton1Down:connect(function()
+
+	if nowe == true then
+		nowe = false
+
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming,true)
+		speaker.Character.Humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+	else 
+		nowe = true
+
+
+
+		for i = 1, speeds do
+			spawn(function()
+
+				local hb = game:GetService("RunService").Heartbeat	
+
+
+				tpwalking = true
+				local chr = game.Players.LocalPlayer.Character
+				local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+				while tpwalking and hb:Wait() and chr and hum and hum.Parent do
+					if hum.MoveDirection.Magnitude > 0 then
+						chr:TranslateBy(hum.MoveDirection)
+					end
+				end
+
+			end)
+		end
+		game.Players.LocalPlayer.Character.Animate.Disabled = true
+		local Char = game.Players.LocalPlayer.Character
+		local Hum = Char:FindFirstChildOfClass("Humanoid") or Char:FindFirstChildOfClass("AnimationController")
+
+		for i,v in next, Hum:GetPlayingAnimationTracks() do
+			v:AdjustSpeed(0)
+		end
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming,false)
+		speaker.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
+	end
+
+
+
+
+	if game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid").RigType == Enum.HumanoidRigType.R6 then
+
+
+
+		local plr = game.Players.LocalPlayer
+		local torso = plr.Character.Torso
+		local flying = true
+		local deb = true
+		local ctrl = {f = 0, b = 0, l = 0, r = 0}
+		local lastctrl = {f = 0, b = 0, l = 0, r = 0}
+		local maxspeed = 50
+		local speed = 0
+
+
+		local bg = Instance.new("BodyGyro", torso)
+		bg.P = 9e4
+		bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+		bg.cframe = torso.CFrame
+		local bv = Instance.new("BodyVelocity", torso)
+		bv.velocity = Vector3.new(0,0.1,0)
+		bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+		if nowe == true then
+			plr.Character.Humanoid.PlatformStand = true
+		end
+		while nowe == true or game:GetService("Players").LocalPlayer.Character.Humanoid.Health == 0 do
+			game:GetService("RunService").RenderStepped:Wait()
+
+			if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
+				speed = speed+.5+(speed/maxspeed)
+				if speed > maxspeed then
+					speed = maxspeed
+				end
+			elseif not (ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0) and speed ~= 0 then
+				speed = speed-1
+				if speed < 0 then
+					speed = 0
+				end
+			end
+			if (ctrl.l + ctrl.r) ~= 0 or (ctrl.f + ctrl.b) ~= 0 then
+				bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (ctrl.f+ctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(ctrl.l+ctrl.r,(ctrl.f+ctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
+				lastctrl = {f = ctrl.f, b = ctrl.b, l = ctrl.l, r = ctrl.r}
+			elseif (ctrl.l + ctrl.r) == 0 and (ctrl.f + ctrl.b) == 0 and speed ~= 0 then
+				bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (lastctrl.f+lastctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(lastctrl.l+lastctrl.r,(lastctrl.f+lastctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
+			else
+				bv.velocity = Vector3.new(0,0,0)
+			end
+			--	game.Players.LocalPlayer.Character.Animate.Disabled = true
+			bg.cframe = game.Workspace.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((ctrl.f+ctrl.b)*50*speed/maxspeed),0,0)
+		end
+		ctrl = {f = 0, b = 0, l = 0, r = 0}
+		lastctrl = {f = 0, b = 0, l = 0, r = 0}
+		speed = 0
+		bg:Destroy()
+		bv:Destroy()
+		plr.Character.Humanoid.PlatformStand = false
+		game.Players.LocalPlayer.Character.Animate.Disabled = false
+		tpwalking = false
+
+
+
+
+	else
+		local plr = game.Players.LocalPlayer
+		local UpperTorso = plr.Character.UpperTorso
+		local flying = true
+		local deb = true
+		local ctrl = {f = 0, b = 0, l = 0, r = 0}
+		local lastctrl = {f = 0, b = 0, l = 0, r = 0}
+		local maxspeed = 50
+		local speed = 0
+
+
+		local bg = Instance.new("BodyGyro", UpperTorso)
+		bg.P = 9e4
+		bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+		bg.cframe = UpperTorso.CFrame
+		local bv = Instance.new("BodyVelocity", UpperTorso)
+		bv.velocity = Vector3.new(0,0.1,0)
+		bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+		if nowe == true then
+			plr.Character.Humanoid.PlatformStand = true
+		end
+		while nowe == true or game:GetService("Players").LocalPlayer.Character.Humanoid.Health == 0 do
+			wait()
+
+			if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
+				speed = speed+.5+(speed/maxspeed)
+				if speed > maxspeed then
+					speed = maxspeed
+				end
+			elseif not (ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0) and speed ~= 0 then
+				speed = speed-1
+				if speed < 0 then
+					speed = 0
+				end
+			end
+			if (ctrl.l + ctrl.r) ~= 0 or (ctrl.f + ctrl.b) ~= 0 then
+				bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (ctrl.f+ctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(ctrl.l+ctrl.r,(ctrl.f+ctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
+				lastctrl = {f = ctrl.f, b = ctrl.b, l = ctrl.l, r = ctrl.r}
+			elseif (ctrl.l + ctrl.r) == 0 and (ctrl.f + ctrl.b) == 0 and speed ~= 0 then
+				bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (lastctrl.f+lastctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(lastctrl.l+lastctrl.r,(lastctrl.f+lastctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
+			else
+				bv.velocity = Vector3.new(0,0,0)
+			end
+
+			bg.cframe = game.Workspace.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((ctrl.f+ctrl.b)*50*speed/maxspeed),0,0)
+		end
+		ctrl = {f = 0, b = 0, l = 0, r = 0}
+		lastctrl = {f = 0, b = 0, l = 0, r = 0}
+		speed = 0
+		bg:Destroy()
+		bv:Destroy()
+		plr.Character.Humanoid.PlatformStand = false
+		game.Players.LocalPlayer.Character.Animate.Disabled = false
+		tpwalking = false
+
+
+
+	end
+
+
+
+
+
+end)
+
+local tis
+
+up.MouseButton1Down:connect(function()
+	tis = up.MouseEnter:connect(function()
+		while tis do
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0,1,0)
+		end
+	end)
+end)
+
+up.MouseLeave:connect(function()
+	if tis then
+		tis:Disconnect()
+		tis = nil
+	end
+end)
+
+local dis
+
+down.MouseButton1Down:connect(function()
+	dis = down.MouseEnter:connect(function()
+		while dis do
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0,-1,0)
+		end
+	end)
+end)
+
+down.MouseLeave:connect(function()
+	if dis then
+		dis:Disconnect()
+		dis = nil
+	end
+end)
+
+
+game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function(char)
+	wait(0.7)
+	game.Players.LocalPlayer.Character.Humanoid.PlatformStand = false
+	game.Players.LocalPlayer.Character.Animate.Disabled = false
+
+end)
+
+
+plus.MouseButton1Down:connect(function()
+	speeds = speeds + 1
+	speed.Text = speeds
+	if nowe == true then
+
+
+		tpwalking = false
+		for i = 1, speeds do
+			spawn(function()
+
+				local hb = game:GetService("RunService").Heartbeat	
+
+
+				tpwalking = true
+				local chr = game.Players.LocalPlayer.Character
+				local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+				while tpwalking and hb:Wait() and chr and hum and hum.Parent do
+					if hum.MoveDirection.Magnitude > 0 then
+						chr:TranslateBy(hum.MoveDirection)
+					end
+				end
+
+			end)
+		end
+	end
+end)
+mine.MouseButton1Down:connect(function()
+	if speeds == 1 then
+		speed.Text = 'cannot be less than 1'
+		wait(1)
+		speed.Text = speeds
+	else
+		speeds = speeds - 1
+		speed.Text = speeds
+		if nowe == true then
+			tpwalking = false
+			for i = 1, speeds do
+				spawn(function()
+
+					local hb = game:GetService("RunService").Heartbeat	
+
+
+					tpwalking = true
+					local chr = game.Players.LocalPlayer.Character
+					local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+					while tpwalking and hb:Wait() and chr and hum and hum.Parent do
+						if hum.MoveDirection.Magnitude > 0 then
+							chr:TranslateBy(hum.MoveDirection)
+						end
+					end
+
+				end)
+			end
+		end
+	end
+end)
+
+closebutton.MouseButton1Click:Connect(function()
+	main:Destroy()
+end)
+
+mini.MouseButton1Click:Connect(function()
+	up.Visible = false
+	down.Visible = false
+	onof.Visible = false
+	plus.Visible = false
+	speed.Visible = false
+	mine.Visible = false
+	mini.Visible = false
+	mini2.Visible = true
+	main.Frame.BackgroundTransparency = 1
+	closebutton.Position =  UDim2.new(0, 0, -1, 57)
+end)
+
+mini2.MouseButton1Click:Connect(function()
+	up.Visible = true
+	down.Visible = true
+	onof.Visible = true
+	plus.Visible = true
+	speed.Visible = true
+	mine.Visible = true
+	mini.Visible = true
+	mini2.Visible = false
+	main.Frame.BackgroundTransparency = 0 
+	closebutton.Position =  UDim2.new(0, 0, -1, 27)
+end)
+        end)
+    end
+
+    -- Add click event handler for the "Gravity" button
+    if i == 3 then
+        button.MouseButton1Click:Connect(function()
+-- Create a ScreenGui instance
+local screenGui = Instance.new("ScreenGui")
+
+-- Create TextBox instance for Enter Gravity Power, and TextButton instances for Close and Go! buttons
+local enterGravityTextBox = Instance.new("TextBox", screenGui)
+local closeButton = Instance.new("TextButton", screenGui)
+local goButton = Instance.new("TextButton", screenGui)
+
+-- Customize Enter Gravity Power TextBox
+enterGravityTextBox.PlaceholderText = "Enter Gravity Power"
+enterGravityTextBox.Size = UDim2.new(0, 140, 0, 40)
+enterGravityTextBox.Position = UDim2.new(0.5, -70, 0.5, -20)
+enterGravityTextBox.BackgroundColor3 = Color3.fromRGB(137, 207, 240)
+enterGravityTextBox.Font = Enum.Font.SourceSans
+enterGravityTextBox.TextColor3 = Color3.new(1, 1, 1)
+enterGravityTextBox.TextSize = 20
+enterGravityTextBox.Text = "" -- Ensure the TextBox is initially empty
+
+-- Customize Close button
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 40, 0, 40)
+closeButton.Position = UDim2.new(0.5, -115, 0.5, -20)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.TextSize = 20
+
+-- Customize Go! button
+goButton.Text = "Go!"
+goButton.Size = UDim2.new(0, 40, 0, 40)
+goButton.Position = UDim2.new(0.5, 75, 0.5, -20)
+goButton.BackgroundColor3 = Color3.fromRGB(137, 207, 240)
+goButton.Font = Enum.Font.GothamBold
+goButton.TextColor3 = Color3.new(1, 1, 1)
+goButton.TextSize = 20
+
+-- Close button functionality
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy() -- Close the GUI when the Close button is clicked
+end)
+
+-- Go! button functionality
+goButton.MouseButton1Click:Connect(function()
+    local gravityPower = tonumber(enterGravityTextBox.Text)
+    if gravityPower then
+        -- Apply the entered gravity power to the workspace
+        workspace.Gravity = gravityPower
+    else
+        -- Handle invalid input (e.g., not a number)
+        warn("Invalid gravity power entered")
+    end
+end)
+
+-- Add the ScreenGui to the player's GUI
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Function to make the buttons and TextBox draggable together
+local function makeDraggable(elements)
+    local dragging = false
+    local dragInput, mousePos, startPositions
+
+    local function updatePositions(delta)
+        for _, element in pairs(elements) do
+            element.Position = UDim2.new(element.Position.X.Scale, startPositions[element].X + delta.X, element.Position.Y.Scale, startPositions[element].Y + delta.Y)
+        end
+    end
+
+    for _, element in pairs(elements) do
+        element.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+                mousePos = input.Position
+                startPositions = {}
+                for _, elem in pairs(elements) do
+                    startPositions[elem] = {X = elem.Position.X.Offset, Y = elem.Position.Y.Offset}
+                end
+
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                    end
+                end)
+            end
+        end)
+
+        element.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                dragInput = input
+            end
+        end)
+    end
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - mousePos
+            updatePositions(delta)
+        end
+    end)
+end
+
+-- Make the buttons and TextBox draggable together
+makeDraggable({enterGravityTextBox, closeButton, goButton})
+        end)
+    end
+end
+
+-- Variables to hold the dragging state
+local dragging = false
+local dragInput, mousePos, framePos
+
+-- Function to update the buttons' positions
+local function update(input)
+    local delta = input.Position - mousePos
+    for _, button in ipairs(buttons) do
+        button.Position = UDim2.new(
+            framePos[button].X.Scale,
+            framePos[button].X.Offset + delta.X,
+            framePos[button].Y.Scale,
+            framePos[button].Y.Offset + delta.Y
+        )
+    end
+end
+
+-- Detect when input begins on any button
+for _, button in ipairs(buttons) do
+    button.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            mousePos = input.Position
+            framePos = {}
+            for _, btn in ipairs(buttons) do
+                framePos[btn] = btn.Position
+            end
+
+            -- Detect when the input state changes (e.g., mouse button released)
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    -- Detect changes in input (e.g., mouse movement)
+    button.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+end
+
+-- Update buttons' positions as the input changes
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)"))()
 end)
 
 -- Function to execute the script when "Others" button is clicked
 buttons[3].MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaCheater/Infinite-Jump/main/Walk%20real"))()
+    loadstring(game:HttpGet("local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Create a ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = playerGui
+
+-- Create four draggable buttons
+local buttons = {}
+local closeButtonSize = UDim2.new(0, 150, 0, 40) -- Slightly smaller horizontal size for the Close button
+local buttonSize = UDim2.new(0, 150, 0, 50) -- Slightly smaller horizontal size for the buttons
+local buttonSpacing = 10 -- Spacing between buttons
+
+-- Create the Close button first
+local closeButton = Instance.new("TextButton")
+closeButton.Size = closeButtonSize -- Adjusted size for the Close button
+closeButton.Position = UDim2.new(0.5, -75, 0.4, 0) -- Position for Close button (original position of "-")
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Red color
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.TextSize = 20
+closeButton.Text = "Close" -- Close button text
+closeButton.Parent = screenGui
+table.insert(buttons, closeButton)
+
+-- Function to close the GUI
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+-- Create the other two buttons with the provided RGB color and rename them
+local buttonNames = {"Walk", "Ghost Mode"}
+for i = 1, 2 do
+    local button = Instance.new("TextButton")
+    button.Size = buttonSize
+    button.Text = buttonNames[i] -- Set button text to the corresponding name
+    button.Position = UDim2.new(0.5, -75, 0.4 + i * (0.05 + closeButtonSize.Y.Scale), 0) -- Adjusted for new size and spacing
+    button.BackgroundColor3 = Color3.fromRGB(240, 211, 96) -- Provided RGB color
+    button.Font = Enum.Font.GothamBold
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.TextSize = 20
+    button.Parent = screenGui
+    table.insert(buttons, button)
+
+    -- Add event handlers for the buttons
+    if i == 1 then
+        button.MouseButton1Click:Connect(function()
+-- Create a ScreenGui instance
+local screenGui = Instance.new("ScreenGui")
+
+-- Create TextBox instance for Enter Speed, and TextButton instances for Close and Go! buttons
+local enterSpeedTextBox = Instance.new("TextBox", screenGui)
+local closeButton = Instance.new("TextButton", screenGui)
+local goButton = Instance.new("TextButton", screenGui)
+
+-- Customize Enter Speed TextBox
+enterSpeedTextBox.PlaceholderText = "Enter Speed"
+enterSpeedTextBox.Size = UDim2.new(0, 140, 0, 40)
+enterSpeedTextBox.Position = UDim2.new(0.5, -70, 0.5, -20)
+enterSpeedTextBox.BackgroundColor3 = Color3.fromRGB(240, 211, 96) -- Changed color to provided yellow
+enterSpeedTextBox.Font = Enum.Font.SourceSans
+enterSpeedTextBox.TextColor3 = Color3.new(1, 1, 1)
+enterSpeedTextBox.TextSize = 20
+enterSpeedTextBox.Text = "" -- Ensure the TextBox is initially empty
+
+-- Customize Close button
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 40, 0, 40)
+closeButton.Position = UDim2.new(0.5, -115, 0.5, -20)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Reverted to previous color
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.TextSize = 20
+
+-- Customize Go! button
+goButton.Text = "Go!"
+goButton.Size = UDim2.new(0, 40, 0, 40)
+goButton.Position = UDim2.new(0.5, 75, 0.5, -20)
+goButton.BackgroundColor3 = Color3.fromRGB(240, 211, 96) -- Changed color to provided yellow
+goButton.Font = Enum.Font.GothamBold
+goButton.TextColor3 = Color3.new(1, 1, 1)
+goButton.TextSize = 20
+
+-- Close button functionality
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy() -- Close the GUI when the Close button is clicked
+end)
+
+-- Go! button functionality
+goButton.MouseButton1Click:Connect(function()
+    local speed = tonumber(enterSpeedTextBox.Text)
+    if speed then
+        -- Change the character's speed
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = speed
+        end
+    else
+        -- Handle invalid input (e.g., not a number)
+        warn("Invalid speed entered")
+    end
+end)
+
+-- Add the ScreenGui to the player's GUI
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Function to make the buttons and TextBox draggable together
+local function makeDraggable(elements)
+    local dragging = false
+    local dragInput, mousePos, startPositions
+
+    local function updatePositions(delta)
+        for _, element in pairs(elements) do
+            element.Position = UDim2.new(element.Position.X.Scale, startPositions[element].X + delta.X, element.Position.Y.Scale, startPositions[element].Y + delta.Y)
+        end
+    end
+
+    for _, element in pairs(elements) do
+        element.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+                mousePos = input.Position
+                startPositions = {}
+                for _, elem in pairs(elements) do
+                    startPositions[elem] = {X = elem.Position.X.Offset, Y = elem.Position.Y.Offset}
+                end
+
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                    end
+                end)
+            end
+        end)
+
+        element.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                dragInput = input
+            end
+        end)
+    end
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - mousePos
+            updatePositions(delta)
+        end
+    end)
+end
+
+-- Make the buttons and TextBox draggable together
+makeDraggable({enterSpeedTextBox, closeButton, goButton})
+        end)
+    elseif i == 2 then
+        button.MouseButton1Click:Connect(function()
+-- create a ScreenGui instance
+local screenGui = Instance.new("ScreenGui")
+
+-- create TextButton instances for Ghost Mode, Close, and Off buttons
+local ghostModeButton = Instance.new("TextButton", screenGui)
+local closeButton = Instance.new("TextButton", screenGui)
+local toggleButton = Instance.new("TextButton", screenGui)
+
+-- customize Ghost Mode button
+ghostModeButton.Text = "Ghost Mode" -- renamed button
+ghostModeButton.Size = UDim2.new(0, 140, 0, 40)
+ghostModeButton.Position = UDim2.new(0.5, -70, 0.5, -20)
+ghostModeButton.BackgroundColor3 = Color3.fromRGB(240, 211, 96) -- yellow color
+ghostModeButton.Font = Enum.Font.SourceSans
+ghostModeButton.TextColor3 = Color3.new(1, 1, 1)
+ghostModeButton.TextSize = 20
+
+-- customize Close button
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 40, 0, 40)
+closeButton.Position = UDim2.new(0.5, -115, 0.5, -20)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.TextSize = 20
+
+-- customize Off button to match Ghost Mode button color
+toggleButton.Text = "Off"
+toggleButton.Size = UDim2.new(0, 40, 0, 40)
+toggleButton.Position = UDim2.new(0.5, 75, 0.5, -20)
+toggleButton.BackgroundColor3 = Color3.fromRGB(240, 211, 96) -- matched yellow color
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.TextColor3 = Color3.new(1, 1, 1)
+toggleButton.TextSize = 20
+
+-- draggable functionality for the buttons
+local userInputService = game:GetService("UserInputService")
+local dragging = false
+local dragStart = nil
+local startPos = nil
+
+local function updateButtonPositions(delta)
+    ghostModeButton.Position = UDim2.new(startPos.ghostModeButton.X.Scale, startPos.ghostModeButton.X.Offset + delta.X, startPos.ghostModeButton.Y.Scale, startPos.ghostModeButton.Y.Offset + delta.Y)
+    closeButton.Position = UDim2.new(startPos.closeButton.X.Scale, startPos.closeButton.X.Offset + delta.X, startPos.closeButton.Y.Scale, startPos.closeButton.Y.Offset + delta.Y)
+    toggleButton.Position = UDim2.new(startPos.toggleButton.X.Scale, startPos.toggleButton.X.Offset + delta.X, startPos.toggleButton.Y.Scale, startPos.toggleButton.Y.Offset + delta.Y)
+end
+
+local function onInputChanged(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        updateButtonPositions(delta)
+    end
+end
+
+local function onInputEnded(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end
+
+ghostModeButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = {
+            ghostModeButton = ghostModeButton.Position,
+            closeButton = closeButton.Position,
+            toggleButton = toggleButton.Position,
+        }
+    end
+end)
+
+userInputService.InputChanged:Connect(onInputChanged)
+userInputService.InputEnded:Connect(onInputEnded)
+
+-- player jump functionality
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local isXPressed = false
+
+-- function to handle key press
+local function onKeyPress(input, gameProcessedEvent)
+    if gameProcessedEvent then return end
+    -- check if the spacebar is pressed
+    if input.KeyCode == Enum.KeyCode.Space then
+        -- if X button is pressed, only allow jump if character is touching the ground
+        if isXPressed and humanoid:GetState() == Enum.HumanoidStateType.Running then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end
+
+-- connect the key press event
+userInputService.InputBegan:Connect(onKeyPress)
+
+-- Walk through Walls toggle functionality
+local walkThroughWallsEnabled = false
+
+local function toggleCanCollide(character, canCollide)
+    for _, part in ipairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = canCollide
+        end
+    end
+end
+
+local function maintainCanCollide(character, canCollide)
+    while walkThroughWallsEnabled do
+        toggleCanCollide(character, canCollide)
+        wait(0.1) -- adjust the wait time as necessary to balance performance and responsiveness
+    end
+end
+
+toggleButton.MouseButton1Click:Connect(function()
+    walkThroughWallsEnabled = not walkThroughWallsEnabled
+    toggleButton.Text = walkThroughWallsEnabled and "On" or "Off"
+    
+    if walkThroughWallsEnabled then
+        coroutine.wrap(function()
+            maintainCanCollide(character, false)
+        end)()
+        print("Walk through walls enabled")
+    else
+        toggleCanCollide(character, true)
+        print("Walk through walls disabled")
+    end
+end)
+
+-- Close button functionality with 0.1-second delay
+closeButton.MouseButton1Click:Connect(function()
+    isXPressed = true -- mark the X button as pressed
+    walkThroughWallsEnabled = false
+    toggleButton.Text = "Off"
+    toggleCanCollide(character, true) -- ensure CanCollide is set to true for all parts
+    wait(0.1) -- wait for 0.1 seconds before closing the GUI
+    screenGui:Destroy() -- close the GUI
+end)
+
+-- Ensure the character parts are updated if the character respawns
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+    humanoid = character:WaitForChild("Humanoid")
+    
+    if walkThroughWallsEnabled then
+        coroutine.wrap(function()
+            maintainCanCollide(character, false)
+        end)()
+    else
+        toggleCanCollide(character, true)
+    end
+end)
+
+-- add the ScreenGui to the player's GUI
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Set CanCollide to true for all parts when script starts, ensuring no initial wall-walking
+toggleCanCollide(character, true)
+        end)
+    end
+end
+
+-- Variables to hold the dragging state
+local dragging = false
+local dragInput, mousePos, framePos
+
+-- Function to update the buttons' positions
+local function update(input)
+    local delta = input.Position - mousePos
+    for _, button in ipairs(buttons) do
+        button.Position = UDim2.new(
+            framePos[button].X.Scale,
+            framePos[button].X.Offset + delta.X,
+            framePos[button].Y.Scale,
+            framePos[button].Y.Offset + delta.Y
+        )
+    end
+end
+
+-- Detect when input begins on any button
+for _, button in ipairs(buttons) do
+    button.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            mousePos = input.Position
+            framePos = {}
+            for _, btn in ipairs(buttons) do
+                framePos[btn] = btn.Position
+            end
+
+            -- Detect when the input state changes (e.g., mouse button released)
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    -- Detect changes in input (e.g., mouse movement)
+    button.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+end
+
+-- Update buttons' positions as the input changes
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)"))()
 end)
 
 -- Function to execute the script when "Walk" button is clicked
 buttons[4].MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaCheater/Infinite-Jump/main/Others"))()
+    loadstring(game:HttpGet("-- Create a ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create four draggable buttons
+local buttons = {}
+local closeButtonSize = UDim2.new(0, 150, 0, 40) -- Slightly smaller horizontal size for the Close button
+local buttonSize = UDim2.new(0, 150, 0, 50) -- Slightly smaller horizontal size for the buttons
+local buttonSpacing = 10 -- Spacing between buttons
+
+-- Create the Close button first
+local closeButton = Instance.new("TextButton")
+closeButton.Size = closeButtonSize -- Adjusted size for the Close button
+closeButton.Position = UDim2.new(0.5, -75, 0.4, 0) -- Position for Close button (original position of "-")
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Red color
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.TextSize = 20
+closeButton.Text = "Close" -- Close button text
+closeButton.Parent = screenGui
+table.insert(buttons, closeButton)
+
+-- Function to close the GUI
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+-- Create the other three buttons with rgb(204, 116, 229) color and rename them
+local buttonColors = Color3.fromRGB(204, 116, 229) -- Color for "Teleport," "Reset," and "Fling and Troll" buttons
+local buttonNames = {"Teleport", "Reset", "Fling and Troll"}
+for i = 1, 3 do
+    local button = Instance.new("TextButton")
+    button.Size = buttonSize
+    button.Text = buttonNames[i] -- Set button text to the corresponding name
+    button.Position = UDim2.new(0.5, -75, 0.4 + i * (0.05 + closeButtonSize.Y.Scale), 0) -- Adjusted for new size and spacing
+    button.BackgroundColor3 = buttonColors -- Set background color
+    button.Font = Enum.Font.GothamBold
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.TextSize = 20
+    button.Parent = screenGui
+    table.insert(buttons, button)
+
+    -- Add click event handler for the "Reset" button
+    if i == 2 then
+        button.MouseButton1Click:Connect(function()
+-- Create a ScreenGui instance
+local screenGui = Instance.new("ScreenGui")
+
+-- Create TextButton instance for the reset confirmation
+local resetButton = Instance.new("TextButton", screenGui)
+resetButton.Text = "Are you sure you want to reset?"
+resetButton.Size = UDim2.new(0, 300, 0, 50)
+resetButton.Position = UDim2.new(0.5, -150, 0.5, -50)
+resetButton.BackgroundColor3 = Color3.fromRGB(204, 116, 229)
+resetButton.Font = Enum.Font.GothamBold
+resetButton.TextColor3 = Color3.new(1, 1, 1)
+resetButton.TextSize = 20
+
+-- Create 'Yes' Button
+local yesButton = Instance.new("TextButton", screenGui)
+yesButton.Text = "Yes"
+yesButton.Size = UDim2.new(0, 150, 0, 50)
+yesButton.Position = UDim2.new(0.5, -150, 0.5, 0) -- Positioned directly below the resetButton
+yesButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+yesButton.Font = Enum.Font.GothamBold
+yesButton.TextColor3 = Color3.new(1, 1, 1)
+yesButton.TextSize = 20
+
+-- Create 'No' Button
+local noButton = Instance.new("TextButton", screenGui)
+noButton.Text = "No"
+noButton.Size = UDim2.new(0, 150, 0, 50)
+noButton.Position = UDim2.new(0.5, 0, 0.5, 0) -- Positioned directly below the resetButton
+noButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+noButton.Font = Enum.Font.GothamBold
+noButton.TextColor3 = Color3.new(1, 1, 1)
+noButton.TextSize = 20
+
+-- Function to make the buttons draggable and move together
+local function makeButtonsDraggable(button1, button2, button3)
+    local dragging = false
+    local dragStart
+    local startPosition1
+    local startPosition2
+    local startPosition3
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        button1.Position = UDim2.new(
+            startPosition1.X.Scale,
+            startPosition1.X.Offset + delta.X,
+            startPosition1.Y.Scale,
+            startPosition1.Y.Offset + delta.Y
+        )
+        button2.Position = UDim2.new(
+            startPosition2.X.Scale,
+            startPosition2.X.Offset + delta.X,
+            startPosition2.Y.Scale,
+            startPosition2.Y.Offset + delta.Y
+        )
+        button3.Position = UDim2.new(
+            startPosition3.X.Scale,
+            startPosition3.X.Offset + delta.X,
+            startPosition3.Y.Scale,
+            startPosition3.Y.Offset + delta.Y
+        )
+    end
+
+    local function onInputBegan(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPosition1 = button1.Position
+            startPosition2 = button2.Position
+            startPosition3 = button3.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end
+
+    local function onInputChanged(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+            update(input)
+        end
+    end
+
+    button1.InputBegan:Connect(onInputBegan)
+    button1.InputChanged:Connect(onInputChanged)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if dragging then
+            update(input)
+        end
+    end)
+end
+
+-- Make the buttons draggable and move together
+makeButtonsDraggable(resetButton, yesButton, noButton)
+
+-- Add the ScreenGui to the player's GUI
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Functionality for the 'Yes' button
+yesButton.MouseButton1Click:Connect(function()
+    -- Reset the player's character
+    local player = game.Players.LocalPlayer
+    if player and player.Character then
+        player.Character:BreakJoints()
+    end
+    screenGui:Destroy() -- Close the GUI after resetting
+end)
+
+-- Functionality for the 'No' button
+noButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy() -- Just close the GUI
+end)
+        end)
+    end
+
+    -- Add click event handler for the "Teleport" button
+    if i == 1 then
+        button.MouseButton1Click:Connect(function()
+-- Create a ScreenGui instance
+local screenGui = Instance.new("ScreenGui")
+
+-- Create TextBox instance for Enter Player Name, and TextButton instances for Close and Go! buttons
+local enterPlayerNameTextBox = Instance.new("TextBox", screenGui)
+local closeButton = Instance.new("TextButton", screenGui)
+local goButton = Instance.new("TextButton", screenGui)
+
+-- Customize Enter Player Name TextBox
+enterPlayerNameTextBox.Name = "EnterPlayerName"
+enterPlayerNameTextBox.PlaceholderText = "Enter Player Name"
+enterPlayerNameTextBox.Size = UDim2.new(0, 140, 0, 40)
+enterPlayerNameTextBox.Position = UDim2.new(0.5, -70, 0.5, -20)
+enterPlayerNameTextBox.BackgroundColor3 = Color3.fromRGB(204, 116, 229) -- Updated color here
+enterPlayerNameTextBox.Font = Enum.Font.SourceSans
+enterPlayerNameTextBox.TextColor3 = Color3.new(1, 1, 1)
+enterPlayerNameTextBox.TextSize = 20
+enterPlayerNameTextBox.Text = "" -- Ensure the TextBox is initially empty
+
+-- Customize Close button
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 40, 0, 40)
+closeButton.Position = UDim2.new(0.5, -115, 0.5, -20)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.TextSize = 20
+
+-- Customize Go! button
+goButton.Text = "Go!"
+goButton.Size = UDim2.new(0, 40, 0, 40)
+goButton.Position = UDim2.new(0.5, 75, 0.5, -20)
+goButton.BackgroundColor3 = Color3.fromRGB(204, 116, 229) -- Updated color here
+goButton.Font = Enum.Font.GothamBold
+goButton.TextColor3 = Color3.new(1, 1, 1)
+goButton.TextSize = 20
+
+-- Close button functionality
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy() -- Close the GUI when the Close button is clicked
+end)
+
+-- Go! button functionality
+goButton.MouseButton1Click:Connect(function()
+    local playerName = enterPlayerNameTextBox.Text:lower()
+    local player = nil
+    
+    for _, plr in ipairs(game.Players:GetPlayers()) do
+        if string.sub(plr.Name:lower(), 1, #playerName) == playerName or 
+           string.sub(plr.DisplayName:lower(), 1, #playerName) == playerName then
+            player = plr
+            break
+        end
+    end
+    
+    if player then
+        -- Teleport the local player to the selected player
+        game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(player.Character.HumanoidRootPart.CFrame)
+    else
+        -- Handle invalid input (e.g., player not found)
+        warn("Player not found.")
+    end
+end)
+
+-- Add the ScreenGui to the player's GUI
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Function to make the buttons and TextBox draggable together
+local function makeDraggable(elements)
+    local dragging = false
+    local dragInput, mousePos, startPositions
+
+    local function updatePositions(delta)
+        for _, element in pairs(elements) do
+            element.Position = UDim2.new(element.Position.X.Scale, startPositions[element].X + delta.X, element.Position.Y.Scale, startPositions[element].Y + delta.Y)
+        end
+    end
+
+    for _, element in pairs(elements) do
+        element.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+                mousePos = input.Position
+                startPositions = {}
+                for _, elem in pairs(elements) do
+                    startPositions[elem] = {X = elem.Position.X.Offset, Y = elem.Position.Y.Offset}
+                end
+
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                    end
+                end)
+            end
+        end)
+
+        element.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                dragInput = input
+            end
+        end)
+    end
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - mousePos
+            updatePositions(delta)
+        end
+    end)
+end
+
+-- Make the buttons and TextBox draggable together
+makeDraggable({enterPlayerNameTextBox, closeButton, goButton})
+        end)
+    end
+
+    -- Add click event handler for the "Fling and Troll" button
+    if i == 3 then
+        button.MouseButton1Click:Connect(function()
+-- Create a ScreenGui instance
+local screenGui = Instance.new("ScreenGui")
+
+-- Create TextBox instance for Fling and Troll, and TextButton instances for Close and Go! buttons
+local flingTextBox = Instance.new("TextBox", screenGui)
+local closeButton = Instance.new("TextButton", screenGui)
+local goButton = Instance.new("TextButton", screenGui)
+
+-- Customize Fling and Troll TextBox
+flingTextBox.Text = "Enter Player Name"
+flingTextBox.Size = UDim2.new(0, 140, 0, 40)
+flingTextBox.Position = UDim2.new(0.5, -70, 0.5, -20)
+flingTextBox.BackgroundColor3 = Color3.fromRGB(204, 116, 229)
+flingTextBox.Font = Enum.Font.SourceSans
+flingTextBox.TextColor3 = Color3.new(1, 1, 1)
+flingTextBox.TextSize = 20
+
+-- Customize Close button
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 40, 0, 40)
+closeButton.Position = UDim2.new(0.5, -115, 0.5, -20)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.TextSize = 20
+
+-- Customize Go! button
+goButton.Text = "Go!"
+goButton.Size = UDim2.new(0, 40, 0, 40)
+goButton.Position = UDim2.new(0.5, 75, 0.5, -20)
+goButton.BackgroundColor3 = Color3.fromRGB(204, 116, 229)
+goButton.Font = Enum.Font.GothamBold
+goButton.TextColor3 = Color3.new(1, 1, 1)
+goButton.TextSize = 20
+
+-- Function to make a group of elements draggable
+local function makeGroupDraggable(elements)
+    local dragging = false
+    local dragStart
+    local startPositions = {}
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        for _, element in pairs(elements) do
+            local startPos = startPositions[element]
+            element.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end
+
+    local function onInputBegan(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPositions = {}
+            for _, element in pairs(elements) do
+                startPositions[element] = element.Position
+            end
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end
+
+    local function onInputChanged(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+            update(input)
+        end
+    end
+
+    for _, element in pairs(elements) do
+        element.InputBegan:Connect(onInputBegan)
+        element.InputChanged:Connect(onInputChanged)
+    end
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if dragging then
+            update(input)
+        end
+    end)
+end
+
+-- Make the buttons draggable as a group
+makeGroupDraggable({flingTextBox, closeButton, goButton})
+
+-- Close GUI when close button is clicked
+closeButton.MouseButton1Click:Connect(function()
+    screenGui.Enabled = false
+end)
+
+-- Player search and notification functions from the trollface script
+local lp = game:FindService("Players").LocalPlayer
+
+local function gplr(String)
+    local Found = {}
+    local strl = String:lower()
+    if strl == "all" then
+        for i,v in pairs(game:FindService("Players"):GetPlayers()) do
+            table.insert(Found,v)
+        end
+    elseif strl == "others" then
+        for i,v in pairs(game:FindService("Players"):GetPlayers()) do
+            if v.Name ~= lp.Name then
+                table.insert(Found,v)
+            end
+        end 
+    elseif strl == "me" then
+        for i,v in pairs(game:FindService("Players"):GetPlayers()) do
+            if v.Name == lp.Name then
+                table.insert(Found,v)
+            end
+        end 
+    else
+        for i,v in pairs(game:FindService("Players"):GetPlayers()) do
+            if v.Name:lower():sub(1, #String) == String:lower() or v.DisplayName:lower():sub(1, #String) == String:lower() then
+                table.insert(Found,v)
+            end
+        end 
+    end
+    return Found 
+end
+
+local function notif(str,dur)
+    game:FindService("StarterGui"):SetCore("SendNotification", {
+        Title = "Yeet GUI",
+        Text = str,
+        Icon = "rbxassetid://2005276185",
+        Duration = dur or 3
+    })
+end
+
+-- Function to troll a player
+local function trollPlayer(playerName)
+    local Target = gplr(playerName)
+    if Target[1] then
+        Target = Target[1]
+
+        local Thrust = Instance.new('BodyThrust', lp.Character.HumanoidRootPart)
+        Thrust.Force = Vector3.new(9999,9999,9999)
+        Thrust.Name = "YeetForce"
+        repeat
+            lp.Character.HumanoidRootPart.CFrame = Target.Character.HumanoidRootPart.CFrame
+            Thrust.Location = Target.Character.HumanoidRootPart.Position
+            game:FindService("RunService").Heartbeat:wait()
+        until not Target.Character:FindFirstChild("Head")
+    else
+        notif("Invalid player")
+    end
+end
+
+-- Connect the Go! button to the trolling function
+goButton.MouseButton1Click:Connect(function()
+    local playerName = flingTextBox.Text
+    trollPlayer(playerName)
+end)
+
+-- Add the ScreenGui to the player's GUI
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Initial notification
+notif("Loaded successfully! Created by ONI", 5)
+        end)
+    end
+end
+
+-- Variables to hold the dragging state
+local dragging = false
+local dragInput, mousePos, framePos
+
+-- Function to update the buttons' positions
+local function update(input)
+    local delta = input.Position - mousePos
+    for _, button in ipairs(buttons) do
+        button.Position = UDim2.new(
+            framePos[button].X.Scale,
+            framePos[button].X.Offset + delta.X,
+            framePos[button].Y.Scale,
+            framePos[button].Y.Offset + delta.Y
+        )
+    end
+end
+
+-- Detect when input begins on any button
+for _, button in ipairs(buttons) do
+    button.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            mousePos = input.Position
+            framePos = {}
+            for _, btn in ipairs(buttons) do
+                framePos[btn] = btn.Position
+            end
+
+            -- Detect when the input state changes (e.g., mouse button released)
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    -- Detect changes in input (e.g., mouse movement)
+    button.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+end
+
+-- Update buttons' positions as the input changes
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)"))()
 end)
 
 -- Function to execute the script when "-" button is clicked
 buttons[1].MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaCheater/Infinite-Jump/main/Cheats"))()
+    loadstring(game:HttpGet("local screenGui = Instance.new("ScreenGui")
+
+local hacksButton = Instance.new("TextButton", screenGui)
+
+local dragging = false
+
+local dragInput
+
+local mousePos
+
+local framePos
+
+
+
+-- Customize the button
+
+hacksButton.Text = "Cheats"
+
+hacksButton.Size = UDim2.new(0, 120, 0, 40) -- Increased width to 120 and decreased height to 40
+
+hacksButton.Position = UDim2.new(0.5, -60, 0.5, 0) -- Adjusted position for new size
+
+hacksButton.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+
+hacksButton.Font = Enum.Font.GothamBold
+
+hacksButton.TextColor3 = Color3.new(1, 1, 1)
+
+hacksButton.TextSize = 20
+
+
+
+-- Function to update the button's position
+
+local function update(input)
+
+    local delta = input.Position - mousePos
+
+    hacksButton.Position = UDim2.new(
+
+        framePos.X.Scale,
+
+        framePos.X.Offset + delta.X,
+
+        framePos.Y.Scale,
+
+        framePos.Y.Offset + delta.Y
+
+    )
+
+end
+
+
+
+-- Detect when input begins on the button
+
+hacksButton.InputBegan:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+
+        dragging = true
+
+        mousePos = input.Position
+
+        framePos = hacksButton.Position
+
+
+
+        input.Changed:Connect(function()
+
+            if input.UserInputState == Enum.UserInputState.End then
+
+                dragging = false
+
+            end
+
+        end)
+
+    end
+
+end)
+
+
+
+-- Detect changes in input (e.g., mouse movement)
+
+hacksButton.InputChanged:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragInput = input
+
+    end
+
+end)
+
+
+
+-- Update the button's position as the input changes
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+
+    if input == dragInput and dragging then
+
+        update(input)
+
+    end
+
+end)
+
+
+
+-- Add the ScreenGui to the player's GUI
+
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")"))()
+    screenGui:Destroy() -- Destroy GUI after executing script
 end)
 
 -- Create the Close button
