@@ -1,0 +1,122 @@
+-- Create a ScreenGui instance
+local screenGui = Instance.new("ScreenGui")
+
+-- Create TextButton instance for the reset confirmation
+local resetButton = Instance.new("TextButton", screenGui)
+resetButton.Text = "Are you sure you want to reset?"
+resetButton.Size = UDim2.new(0, 300, 0, 50)
+resetButton.Position = UDim2.new(0.5, -150, 0.5, -50)
+resetButton.BackgroundColor3 = Color3.fromRGB(204, 116, 229)
+resetButton.Font = Enum.Font.GothamBold
+resetButton.TextColor3 = Color3.new(1, 1, 1)
+resetButton.TextSize = 20
+
+-- Create a container for the 'Yes' and 'No' buttons
+local buttonContainer = Instance.new("Frame", screenGui)
+buttonContainer.Size = UDim2.new(0, 300, 0, 40)
+buttonContainer.Position = UDim2.new(0.5, -150, 0.5, 0) -- Positioned directly below the resetButton
+buttonContainer.BackgroundTransparency = 1 -- Make the container invisible
+
+-- Create 'Yes' Button
+local yesButton = Instance.new("TextButton", buttonContainer)
+yesButton.Text = "Yes"
+yesButton.Size = UDim2.new(0, 150, 0, 40)
+yesButton.Position = UDim2.new(0, 150, 0, 0) -- New position
+yesButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+yesButton.Font = Enum.Font.GothamBold
+yesButton.TextColor3 = Color3.new(1, 1, 1)
+yesButton.TextSize = 20
+
+-- Create 'No' Button
+local noButton = Instance.new("TextButton", buttonContainer)
+noButton.Text = "No"
+noButton.Size = UDim2.new(0, 150, 0, 40)
+noButton.Position = UDim2.new(0, 0, 0, 0) -- New position
+noButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+noButton.Font = Enum.Font.GothamBold
+noButton.TextColor3 = Color3.new(1, 1, 1)
+noButton.TextSize = 20
+
+-- Function to make the buttons draggable and stick together
+local function makeButtonsDraggable(button1, button2)
+    local dragging = false
+    local dragStart
+    local startPosition1
+    local startPosition2
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        button1.Position = UDim2.new(
+            startPosition1.X.Scale,
+            startPosition1.X.Offset + delta.X,
+            startPosition1.Y.Scale,
+            startPosition1.Y.Offset + delta.Y
+        )
+        -- Update button2's position to stick with button1
+        button2.Position = button1.Position
+    end
+
+    local function onInputBegan(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPosition1 = button1.Position
+            startPosition2 = button2.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end
+
+    local function onInputChanged(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+            update(input)
+        end
+    end
+
+    button1.InputBegan:Connect(onInputBegan)
+    button1.InputChanged:Connect(onInputChanged)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if dragging then
+            update(input)
+        end
+    end)
+end
+
+-- Make the reset button and 'Yes' button draggable and stick together
+makeButtonsDraggable(resetButton, yesButton)
+
+-- Make the 'Yes' and 'No' buttons draggable and stick together
+makeButtonsDraggable(yesButton, noButton)
+
+-- Add the ScreenGui to the player's GUI
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Functionality for the 'Yes' button
+yesButton.MouseButton1Click:Connect(function()
+    -- Reset the player's character
+    local player = game.Players.LocalPlayer
+    if player and player.Character then
+        player.Character:BreakJoints()
+    end
+end)
+
+-- Functionality for the 'No' button
+noButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+-- Initial notification
+local function notif(str, dur)
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Yeet GUI",
+        Text = str,
+        Icon = "rbxassetid://2005276185",
+        Duration = dur or 3
+    })
+end
+
+notif("Loaded successfully! Created by ONI", 5)
