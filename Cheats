@@ -1,0 +1,115 @@
+local screenGui = Instance.new("ScreenGui")
+
+local hacksButton = Instance.new("TextButton", screenGui)
+
+local dragging = false
+
+local dragInput
+
+local mousePos
+
+local framePos
+
+
+
+-- Customize the button
+
+hacksButton.Text = "Cheats"
+
+hacksButton.Size = UDim2.new(0, 120, 0, 40) -- Increased width to 120 and decreased height to 40
+
+hacksButton.Position = UDim2.new(0.5, -60, 0.5, 0) -- Adjusted position for new size
+
+hacksButton.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+
+hacksButton.Font = Enum.Font.GothamBold
+
+hacksButton.TextColor3 = Color3.new(1, 1, 1)
+
+hacksButton.TextSize = 20
+
+
+
+-- Function to update the button's position
+
+local function update(input)
+
+    local delta = input.Position - mousePos
+
+    hacksButton.Position = UDim2.new(
+
+        framePos.X.Scale,
+
+        framePos.X.Offset + delta.X,
+
+        framePos.Y.Scale,
+
+        framePos.Y.Offset + delta.Y
+
+    )
+
+end
+
+
+
+-- Detect when input begins on the button
+
+hacksButton.InputBegan:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+
+        dragging = true
+
+        mousePos = input.Position
+
+        framePos = hacksButton.Position
+
+
+
+        input.Changed:Connect(function()
+
+            if input.UserInputState == Enum.UserInputState.End then
+
+                dragging = false
+
+            end
+
+        end)
+
+    end
+
+end)
+
+
+
+-- Detect changes in input (e.g., mouse movement)
+
+hacksButton.InputChanged:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragInput = input
+
+    end
+
+end)
+
+
+
+-- Update the button's position as the input changes
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+
+    if input == dragInput and dragging then
+
+        update(input)
+
+    end
+
+end)
+
+
+
+-- Add the ScreenGui to the player's GUI
+
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
