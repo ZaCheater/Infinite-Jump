@@ -43,21 +43,412 @@ for i = 1, 3 do
     -- Add click event handler for the "Reset" button
     if i == 2 then
         button.MouseButton1Click:Connect(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaCheater/Infinite-Jump/main/Reset"))()
+-- Create a ScreenGui instance
+local screenGui = Instance.new("ScreenGui")
+
+-- Create TextButton instance for the reset confirmation
+local resetButton = Instance.new("TextButton", screenGui)
+resetButton.Text = "Are you sure you want to reset?"
+resetButton.Size = UDim2.new(0, 300, 0, 50)
+resetButton.Position = UDim2.new(0.5, -150, 0.5, -50)
+resetButton.BackgroundColor3 = Color3.fromRGB(204, 116, 229)
+resetButton.Font = Enum.Font.GothamBold
+resetButton.TextColor3 = Color3.new(1, 1, 1)
+resetButton.TextSize = 20
+
+-- Create 'Yes' Button
+local yesButton = Instance.new("TextButton", screenGui)
+yesButton.Text = "Yes"
+yesButton.Size = UDim2.new(0, 150, 0, 50)
+yesButton.Position = UDim2.new(0.5, -150, 0.5, 0) -- Positioned directly below the resetButton
+yesButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+yesButton.Font = Enum.Font.GothamBold
+yesButton.TextColor3 = Color3.new(1, 1, 1)
+yesButton.TextSize = 20
+
+-- Create 'No' Button
+local noButton = Instance.new("TextButton", screenGui)
+noButton.Text = "No"
+noButton.Size = UDim2.new(0, 150, 0, 50)
+noButton.Position = UDim2.new(0.5, 0, 0.5, 0) -- Positioned directly below the resetButton
+noButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+noButton.Font = Enum.Font.GothamBold
+noButton.TextColor3 = Color3.new(1, 1, 1)
+noButton.TextSize = 20
+
+-- Function to make the buttons draggable and move together
+local function makeButtonsDraggable(button1, button2, button3)
+    local dragging = false
+    local dragStart
+    local startPosition1
+    local startPosition2
+    local startPosition3
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        button1.Position = UDim2.new(
+            startPosition1.X.Scale,
+            startPosition1.X.Offset + delta.X,
+            startPosition1.Y.Scale,
+            startPosition1.Y.Offset + delta.Y
+        )
+        button2.Position = UDim2.new(
+            startPosition2.X.Scale,
+            startPosition2.X.Offset + delta.X,
+            startPosition2.Y.Scale,
+            startPosition2.Y.Offset + delta.Y
+        )
+        button3.Position = UDim2.new(
+            startPosition3.X.Scale,
+            startPosition3.X.Offset + delta.X,
+            startPosition3.Y.Scale,
+            startPosition3.Y.Offset + delta.Y
+        )
+    end
+
+    local function onInputBegan(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPosition1 = button1.Position
+            startPosition2 = button2.Position
+            startPosition3 = button3.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end
+
+    local function onInputChanged(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+            update(input)
+        end
+    end
+
+    button1.InputBegan:Connect(onInputBegan)
+    button1.InputChanged:Connect(onInputChanged)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if dragging then
+            update(input)
+        end
+    end)
+end
+
+-- Make the buttons draggable and move together
+makeButtonsDraggable(resetButton, yesButton, noButton)
+
+-- Add the ScreenGui to the player's GUI
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Functionality for the 'Yes' button
+yesButton.MouseButton1Click:Connect(function()
+    -- Reset the player's character
+    local player = game.Players.LocalPlayer
+    if player and player.Character then
+        player.Character:BreakJoints()
+    end
+    screenGui:Destroy() -- Close the GUI after resetting
+end)
+
+-- Functionality for the 'No' button
+noButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy() -- Just close the GUI
+end)
         end)
     end
 
     -- Add click event handler for the "Teleport" button
     if i == 1 then
         button.MouseButton1Click:Connect(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaCheater/Infinite-Jump/main/Teleport"))()
+-- Create a ScreenGui instance
+local screenGui = Instance.new("ScreenGui")
+
+-- Create TextBox instance for Enter Player Name, and TextButton instances for Close and Go! buttons
+local enterPlayerNameTextBox = Instance.new("TextBox", screenGui)
+local closeButton = Instance.new("TextButton", screenGui)
+local goButton = Instance.new("TextButton", screenGui)
+
+-- Customize Enter Player Name TextBox
+enterPlayerNameTextBox.Name = "EnterPlayerName"
+enterPlayerNameTextBox.PlaceholderText = "Enter Player Name"
+enterPlayerNameTextBox.Size = UDim2.new(0, 140, 0, 40)
+enterPlayerNameTextBox.Position = UDim2.new(0.5, -70, 0.5, -20)
+enterPlayerNameTextBox.BackgroundColor3 = Color3.fromRGB(204, 116, 229) -- Updated color here
+enterPlayerNameTextBox.Font = Enum.Font.SourceSans
+enterPlayerNameTextBox.TextColor3 = Color3.new(1, 1, 1)
+enterPlayerNameTextBox.TextSize = 20
+enterPlayerNameTextBox.Text = "" -- Ensure the TextBox is initially empty
+
+-- Customize Close button
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 40, 0, 40)
+closeButton.Position = UDim2.new(0.5, -115, 0.5, -20)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.TextSize = 20
+
+-- Customize Go! button
+goButton.Text = "Go!"
+goButton.Size = UDim2.new(0, 40, 0, 40)
+goButton.Position = UDim2.new(0.5, 75, 0.5, -20)
+goButton.BackgroundColor3 = Color3.fromRGB(204, 116, 229) -- Updated color here
+goButton.Font = Enum.Font.GothamBold
+goButton.TextColor3 = Color3.new(1, 1, 1)
+goButton.TextSize = 20
+
+-- Close button functionality
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy() -- Close the GUI when the Close button is clicked
+end)
+
+-- Go! button functionality
+goButton.MouseButton1Click:Connect(function()
+    local playerName = enterPlayerNameTextBox.Text:lower()
+    local player = nil
+    
+    for _, plr in ipairs(game.Players:GetPlayers()) do
+        if string.sub(plr.Name:lower(), 1, #playerName) == playerName or 
+           string.sub(plr.DisplayName:lower(), 1, #playerName) == playerName then
+            player = plr
+            break
+        end
+    end
+    
+    if player then
+        -- Teleport the local player to the selected player
+        game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(player.Character.HumanoidRootPart.CFrame)
+    else
+        -- Handle invalid input (e.g., player not found)
+        warn("Player not found.")
+    end
+end)
+
+-- Add the ScreenGui to the player's GUI
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Function to make the buttons and TextBox draggable together
+local function makeDraggable(elements)
+    local dragging = false
+    local dragInput, mousePos, startPositions
+
+    local function updatePositions(delta)
+        for _, element in pairs(elements) do
+            element.Position = UDim2.new(element.Position.X.Scale, startPositions[element].X + delta.X, element.Position.Y.Scale, startPositions[element].Y + delta.Y)
+        end
+    end
+
+    for _, element in pairs(elements) do
+        element.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+                mousePos = input.Position
+                startPositions = {}
+                for _, elem in pairs(elements) do
+                    startPositions[elem] = {X = elem.Position.X.Offset, Y = elem.Position.Y.Offset}
+                end
+
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                    end
+                end)
+            end
+        end)
+
+        element.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                dragInput = input
+            end
+        end)
+    end
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - mousePos
+            updatePositions(delta)
+        end
+    end)
+end
+
+-- Make the buttons and TextBox draggable together
+makeDraggable({enterPlayerNameTextBox, closeButton, goButton})
         end)
     end
 
     -- Add click event handler for the "Fling and Troll" button
     if i == 3 then
         button.MouseButton1Click:Connect(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaCheater/Infinite-Jump/main/Fling"))()
+-- Create a ScreenGui instance
+local screenGui = Instance.new("ScreenGui")
+
+-- Create TextBox instance for Fling and Troll, and TextButton instances for Close and Go! buttons
+local flingTextBox = Instance.new("TextBox", screenGui)
+local closeButton = Instance.new("TextButton", screenGui)
+local goButton = Instance.new("TextButton", screenGui)
+
+-- Customize Fling and Troll TextBox
+flingTextBox.Text = "Enter Player Name"
+flingTextBox.Size = UDim2.new(0, 140, 0, 40)
+flingTextBox.Position = UDim2.new(0.5, -70, 0.5, -20)
+flingTextBox.BackgroundColor3 = Color3.fromRGB(204, 116, 229)
+flingTextBox.Font = Enum.Font.SourceSans
+flingTextBox.TextColor3 = Color3.new(1, 1, 1)
+flingTextBox.TextSize = 20
+
+-- Customize Close button
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 40, 0, 40)
+closeButton.Position = UDim2.new(0.5, -115, 0.5, -20)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.TextSize = 20
+
+-- Customize Go! button
+goButton.Text = "Go!"
+goButton.Size = UDim2.new(0, 40, 0, 40)
+goButton.Position = UDim2.new(0.5, 75, 0.5, -20)
+goButton.BackgroundColor3 = Color3.fromRGB(204, 116, 229)
+goButton.Font = Enum.Font.GothamBold
+goButton.TextColor3 = Color3.new(1, 1, 1)
+goButton.TextSize = 20
+
+-- Function to make a group of elements draggable
+local function makeGroupDraggable(elements)
+    local dragging = false
+    local dragStart
+    local startPositions = {}
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        for _, element in pairs(elements) do
+            local startPos = startPositions[element]
+            element.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end
+
+    local function onInputBegan(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPositions = {}
+            for _, element in pairs(elements) do
+                startPositions[element] = element.Position
+            end
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end
+
+    local function onInputChanged(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+            update(input)
+        end
+    end
+
+    for _, element in pairs(elements) do
+        element.InputBegan:Connect(onInputBegan)
+        element.InputChanged:Connect(onInputChanged)
+    end
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if dragging then
+            update(input)
+        end
+    end)
+end
+
+-- Make the buttons draggable as a group
+makeGroupDraggable({flingTextBox, closeButton, goButton})
+
+-- Close GUI when close button is clicked
+closeButton.MouseButton1Click:Connect(function()
+    screenGui.Enabled = false
+end)
+
+-- Player search and notification functions from the trollface script
+local lp = game:FindService("Players").LocalPlayer
+
+local function gplr(String)
+    local Found = {}
+    local strl = String:lower()
+    if strl == "all" then
+        for i,v in pairs(game:FindService("Players"):GetPlayers()) do
+            table.insert(Found,v)
+        end
+    elseif strl == "others" then
+        for i,v in pairs(game:FindService("Players"):GetPlayers()) do
+            if v.Name ~= lp.Name then
+                table.insert(Found,v)
+            end
+        end 
+    elseif strl == "me" then
+        for i,v in pairs(game:FindService("Players"):GetPlayers()) do
+            if v.Name == lp.Name then
+                table.insert(Found,v)
+            end
+        end 
+    else
+        for i,v in pairs(game:FindService("Players"):GetPlayers()) do
+            if v.Name:lower():sub(1, #String) == String:lower() or v.DisplayName:lower():sub(1, #String) == String:lower() then
+                table.insert(Found,v)
+            end
+        end 
+    end
+    return Found 
+end
+
+local function notif(str,dur)
+    game:FindService("StarterGui"):SetCore("SendNotification", {
+        Title = "Yeet GUI",
+        Text = str,
+        Icon = "rbxassetid://2005276185",
+        Duration = dur or 3
+    })
+end
+
+-- Function to troll a player
+local function trollPlayer(playerName)
+    local Target = gplr(playerName)
+    if Target[1] then
+        Target = Target[1]
+
+        local Thrust = Instance.new('BodyThrust', lp.Character.HumanoidRootPart)
+        Thrust.Force = Vector3.new(9999,9999,9999)
+        Thrust.Name = "YeetForce"
+        repeat
+            lp.Character.HumanoidRootPart.CFrame = Target.Character.HumanoidRootPart.CFrame
+            Thrust.Location = Target.Character.HumanoidRootPart.Position
+            game:FindService("RunService").Heartbeat:wait()
+        until not Target.Character:FindFirstChild("Head")
+    else
+        notif("Invalid player")
+    end
+end
+
+-- Connect the Go! button to the trolling function
+goButton.MouseButton1Click:Connect(function()
+    local playerName = flingTextBox.Text
+    trollPlayer(playerName)
+end)
+
+-- Add the ScreenGui to the player's GUI
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Initial notification
+notif("Loaded successfully! Created by ONI", 5)
         end)
     end
 end
